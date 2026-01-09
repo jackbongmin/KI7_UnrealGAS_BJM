@@ -7,7 +7,11 @@
 		{
 			"Name": "KI7_UnrealGAS_BJM",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"GameplayAbilities",
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [
