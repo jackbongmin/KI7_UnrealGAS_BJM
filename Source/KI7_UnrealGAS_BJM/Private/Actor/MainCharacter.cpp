@@ -11,15 +11,15 @@
 AMainCharacter::AMainCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// 컴포넌트 생성
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
 	PlayerAttributeSet = CreateDefaultSubobject<UPlayerAttributeSet>(TEXT("PlayerAttributeSet"));
 
-	PlayerHUDComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerHUD"));
-	PlayerHUDComponent->SetupAttachment(RootComponent);
+	BarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerHUD"));
+	BarComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -36,33 +36,20 @@ void AMainCharacter::BeginPlay()
 		{
 			AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
-			// 1. 초기값 UI 반영
-			if (PlayerHUDComponent && PlayerHUDComponent->GetWidget() && PlayerHUDComponent->GetWidget()->Implements<UTwinResource>())
-			{
-				ITwinResource::Execute_UpdateMaxHealth(PlayerHUDComponent->GetWidget(), PlayerAttributeSet->GetMaxHealth());
-				ITwinResource::Execute_UpdateCurrentHealth(PlayerHUDComponent->GetWidget(), PlayerAttributeSet->GetHealth());
-				ITwinResource::Execute_UpdateMaxMana(PlayerHUDComponent->GetWidget(), PlayerAttributeSet->GetMaxMana());
-				ITwinResource::Execute_UpdateCurrentMana(PlayerHUDComponent->GetWidget(), PlayerAttributeSet->GetMana());
-			}
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetHealthAttribute()).AddUObject(this, &AMainCharacter::OnHealthChange);
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &AMainCharacter::OnMaxHealthChange);
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetManaAttribute()).AddUObject(this, &AMainCharacter::OnManaChange);
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetMaxManaAttribute()).AddUObject(this, &AMainCharacter::OnMaxManaChange);
 
-			// 2. 값이 변할 때 UI 업데이트 (람다 함수 사용)
-			// Health
-			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetHealthAttribute()).AddLambda(
-				[this](const FOnAttributeChangeData& Data) {
-					if (PlayerHUDComponent && PlayerHUDComponent->GetWidget() && PlayerHUDComponent->GetWidget()->Implements<UTwinResource>()) {
-						ITwinResource::Execute_UpdateCurrentHealth(PlayerHUDComponent->GetWidget(), Data.NewValue);
-					}
-				});
-			// Mana
-			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetManaAttribute()).AddLambda(
-				[this](const FOnAttributeChangeData& Data) {
-					if (PlayerHUDComponent && PlayerHUDComponent->GetWidget() && PlayerHUDComponent->GetWidget()->Implements<UTwinResource>()) {
-						ITwinResource::Execute_UpdateCurrentMana(PlayerHUDComponent->GetWidget(), Data.NewValue);
-					}
-				});
+			if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+			{
+				ITwinResource::Execute_UpdateMaxHealth(BarComponent->GetWidget(), PlayerAttributeSet->GetMaxHealth());
+				ITwinResource::Execute_UpdateCurrentHealth(BarComponent->GetWidget(), PlayerAttributeSet->GetHealth());
+				ITwinResource::Execute_UpdateMaxMana(BarComponent->GetWidget(), PlayerAttributeSet->GetMaxMana());
+				ITwinResource::Execute_UpdateCurrentMana(BarComponent->GetWidget(), PlayerAttributeSet->GetMana());
+			}
 		}
 	}
-
 }
 
 // Called every frame
@@ -77,5 +64,37 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AMainCharacter::OnHealthChange(const FOnAttributeChangeData& InData)
+{
+	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	{
+		ITwinResource::Execute_UpdateCurrentHealth(BarComponent->GetWidget(), InData.NewValue);
+	}
+}
+
+void AMainCharacter::OnMaxHealthChange(const FOnAttributeChangeData& InData)
+{
+	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	{
+		ITwinResource::Execute_UpdateMaxHealth(BarComponent->GetWidget(), InData.NewValue);
+	}
+}
+
+void AMainCharacter::OnManaChange(const FOnAttributeChangeData& InData)
+{
+	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	{
+		ITwinResource::Execute_UpdateCurrentMana(BarComponent->GetWidget(), InData.NewValue);
+	}
+}
+
+void AMainCharacter::OnMaxManaChange(const FOnAttributeChangeData& InData)
+{
+	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	{
+		ITwinResource::Execute_UpdateMaxMana(BarComponent->GetWidget(), InData.NewValue);
+	}
 }
 

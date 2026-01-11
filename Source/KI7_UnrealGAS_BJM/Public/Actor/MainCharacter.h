@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
+#include "GameplayEffectTypes.h"
 #include "MainCharacter.generated.h"
 
 class UPlayerAttributeSet;
@@ -34,6 +35,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	void OnHealthChange(const FOnAttributeChangeData& InData);
+	void OnMaxHealthChange(const FOnAttributeChangeData& InData);
+	void OnManaChange(const FOnAttributeChangeData& InData);
+	void OnMaxManaChange(const FOnAttributeChangeData& InData);
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -42,6 +49,6 @@ public:
 	TObjectPtr<UPlayerAttributeSet> PlayerAttributeSet;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UWidgetComponent> PlayerHUDComponent;
+	TObjectPtr<UWidgetComponent> BarComponent;
 
 };
