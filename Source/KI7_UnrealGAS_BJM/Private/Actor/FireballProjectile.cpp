@@ -15,7 +15,7 @@ AFireballProjectile::AFireballProjectile()
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SetRootComponent(SphereComponent);
-	SphereComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic")); // 겹침 감지용
+	SphereComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SphereComponent->SetSphereRadius(30.0f);
 
 

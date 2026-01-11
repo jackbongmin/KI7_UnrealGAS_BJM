@@ -26,7 +26,6 @@ public:
 	virtual void UpdateMaxMana_Implementation(float InValue) override;
 
 protected:
-	// 내부적으로 UI 업데이트하는 함수
 	void UpdateHealthUI();
 	void UpdateManaUI();
 
