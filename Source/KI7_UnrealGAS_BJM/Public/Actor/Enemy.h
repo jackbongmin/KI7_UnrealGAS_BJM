@@ -15,7 +15,7 @@ class UWidgetComponent;
 
 
 UCLASS()
-class KI7_UNREALGAS_BJM_API AEnemy : public ACharacter
+class KI7_UNREALGAS_BJM_API AEnemy : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +23,10 @@ class KI7_UNREALGAS_BJM_API AEnemy : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AEnemy();
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override {
+		return AbilitySystemComponent;
+	};
 
 protected:
 	// Called when the game starts or when spawned

@@ -12,6 +12,9 @@
 class UPlayerAttributeSet;
 class UAbilitySystemComponent;
 class UWidgetComponent;
+class UGameplayAbility;
+class UInputAction;
+class UInputMappingContext;
 
 UCLASS()
 class KI7_UNREALGAS_BJM_API AMainCharacter : public ACharacter, public IAbilitySystemInterface
@@ -35,6 +38,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void OnFireInput();
+
 private:
 	void OnHealthChange(const FOnAttributeChangeData& InData);
 	void OnMaxHealthChange(const FOnAttributeChangeData& InData);
@@ -50,5 +55,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> BarComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
+	TSubclassOf<UGameplayAbility> FireballAbilityClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Attack;
 
 };
