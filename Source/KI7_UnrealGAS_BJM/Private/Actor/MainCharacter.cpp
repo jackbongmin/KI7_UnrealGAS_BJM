@@ -21,8 +21,6 @@ AMainCharacter::AMainCharacter()
 
 	PlayerAttributeSet = CreateDefaultSubobject<UPlayerAttributeSet>(TEXT("PlayerAttributeSet"));
 
-	BarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerHUD"));
-	BarComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -32,6 +30,15 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsLocallyControlled() && PlayerHUDClass)
+	{
+		PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDClass);
+		if (PlayerHUDWidget)
+		{
+			PlayerHUDWidget->AddToViewport();
+		}
+	}
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -54,11 +61,11 @@ void AMainCharacter::BeginPlay()
 			if (FireballAbilityClass)
 			{
 				AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireballAbilityClass, 1, 0, this));
-				UE_LOG(LogTemp, Warning, TEXT("[BeginPlay] 어빌리티 부여 성공! 클래스: %s"), *FireballAbilityClass->GetName());
+				UE_LOG(LogTemp, Warning, TEXT("어빌리티 부여 성공 클래스: %s"), *FireballAbilityClass->GetName());
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("[BeginPlay] FireballAbilityClass가 비어있음! BP에서 설정 안 함?"));
+				UE_LOG(LogTemp, Error, TEXT("FireballAbilityClass가 비어있음"));
 			}
 
 			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetHealthAttribute()).AddUObject(this, &AMainCharacter::OnHealthChange);
@@ -66,12 +73,12 @@ void AMainCharacter::BeginPlay()
 			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetManaAttribute()).AddUObject(this, &AMainCharacter::OnManaChange);
 			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UPlayerAttributeSet::GetMaxManaAttribute()).AddUObject(this, &AMainCharacter::OnMaxManaChange);
 
-			if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+			if (PlayerHUDWidget && PlayerHUDWidget->Implements<UTwinResource>())
 			{
-				ITwinResource::Execute_UpdateMaxHealth(BarComponent->GetWidget(), PlayerAttributeSet->GetMaxHealth());
-				ITwinResource::Execute_UpdateCurrentHealth(BarComponent->GetWidget(), PlayerAttributeSet->GetHealth());
-				ITwinResource::Execute_UpdateMaxMana(BarComponent->GetWidget(), PlayerAttributeSet->GetMaxMana());
-				ITwinResource::Execute_UpdateCurrentMana(BarComponent->GetWidget(), PlayerAttributeSet->GetMana());
+				ITwinResource::Execute_UpdateMaxHealth(PlayerHUDWidget, PlayerAttributeSet->GetMaxHealth());
+				ITwinResource::Execute_UpdateCurrentHealth(PlayerHUDWidget, PlayerAttributeSet->GetHealth());
+				ITwinResource::Execute_UpdateMaxMana(PlayerHUDWidget, PlayerAttributeSet->GetMaxMana());
+				ITwinResource::Execute_UpdateCurrentMana(PlayerHUDWidget, PlayerAttributeSet->GetMana());
 			}
 		}
 	}
@@ -101,26 +108,25 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::OnFireInput()
 {
-	//UE_LOG(LogTemp, Log, TEXT("빠이어 볼!"))
-	UE_LOG(LogTemp, Log, TEXT(" [Input] 클릭 입력 감지됨!"));
+	UE_LOG(LogTemp, Log, TEXT("빠이어 볼!"))
+
 
 	if (AbilitySystemComponent && FireballAbilityClass)
 	{
-		// [진단 2] 실행 시도 결과 확인
 		bool bSuccess = AbilitySystemComponent->TryActivateAbilityByClass(FireballAbilityClass);
 
 		if (bSuccess)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("✅ [Input] TryActivate 성공! (이제 GA 로그가 떠야 함)"));
+			UE_LOG(LogTemp, Warning, TEXT("TryActivate 성공"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("❌ [Input] TryActivate 실패! (마나 부족? 쿨타임? 태그 문제? 어빌리티 부여 안됨?)"));
+			UE_LOG(LogTemp, Error, TEXT("TryActivate 실패"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("❌ [Input] ASC가 없거나 FireballAbilityClass가 None임!"));
+		UE_LOG(LogTemp, Error, TEXT("None임"));
 	}
 
 	if (AbilitySystemComponent && FireballAbilityClass)
@@ -131,33 +137,33 @@ void AMainCharacter::OnFireInput()
 
 void AMainCharacter::OnHealthChange(const FOnAttributeChangeData& InData)
 {
-	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	if (PlayerHUDWidget && PlayerHUDWidget->Implements<UTwinResource>())
 	{
-		ITwinResource::Execute_UpdateCurrentHealth(BarComponent->GetWidget(), InData.NewValue);
+		ITwinResource::Execute_UpdateCurrentHealth(PlayerHUDWidget, InData.NewValue);
 	}
 }
 
 void AMainCharacter::OnMaxHealthChange(const FOnAttributeChangeData& InData)
 {
-	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	if (PlayerHUDWidget && PlayerHUDWidget->Implements<UTwinResource>())
 	{
-		ITwinResource::Execute_UpdateMaxHealth(BarComponent->GetWidget(), InData.NewValue);
+		ITwinResource::Execute_UpdateMaxHealth(PlayerHUDWidget, InData.NewValue);
 	}
 }
 
 void AMainCharacter::OnManaChange(const FOnAttributeChangeData& InData)
 {
-	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	if (PlayerHUDWidget && PlayerHUDWidget->Implements<UTwinResource>())
 	{
-		ITwinResource::Execute_UpdateCurrentMana(BarComponent->GetWidget(), InData.NewValue);
+		ITwinResource::Execute_UpdateCurrentMana(PlayerHUDWidget, InData.NewValue);
 	}
 }
 
 void AMainCharacter::OnMaxManaChange(const FOnAttributeChangeData& InData)
 {
-	if (BarComponent && BarComponent->GetWidget() && BarComponent->GetWidget()->Implements<UTwinResource>())
+	if (PlayerHUDWidget && PlayerHUDWidget->Implements<UTwinResource>())
 	{
-		ITwinResource::Execute_UpdateMaxMana(BarComponent->GetWidget(), InData.NewValue);
+		ITwinResource::Execute_UpdateMaxMana(PlayerHUDWidget, InData.NewValue);
 	}
 }
 

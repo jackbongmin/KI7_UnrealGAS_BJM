@@ -15,6 +15,7 @@ class UWidgetComponent;
 class UGameplayAbility;
 class UInputAction;
 class UInputMappingContext;
+class UUserWidget;
 
 UCLASS()
 class KI7_UNREALGAS_BJM_API AMainCharacter : public ACharacter, public IAbilitySystemInterface
@@ -53,9 +54,6 @@ public:
 	UPROPERTY()
 	TObjectPtr<UPlayerAttributeSet> PlayerAttributeSet;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UWidgetComponent> BarComponent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
 	TSubclassOf<UGameplayAbility> FireballAbilityClass;
 
@@ -64,5 +62,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Attack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> PlayerHUDWidget;
 
 };
